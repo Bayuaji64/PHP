@@ -1,3 +1,4 @@
-# PHP-Laravel
+# Learn PHP Languange with Project
 
-#Note
+1.  Laravel
+2.  Codelgniter
