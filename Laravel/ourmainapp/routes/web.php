@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\FollowController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,7 +39,10 @@ Route::post('/manage-avatar', [UserController::class, "storeAvatar"])->middlewar
 
 
 
+//Follow related routes
 
+Route::post('/create-follow/{userId:username}', [FollowController::class, 'createFollow'])->middleware('mustBeLoggedIn');
+Route::post('/remove-follow/{userId:username}', [FollowController::class, 'removeFollow'])->middleware('mustBeLoggedIn');
 
 //Blog post related routes
 Route::get('/create-post', [PostController::class, "showCreateForm"])->middleware('mustBeLoggedIn');
@@ -56,3 +60,5 @@ Route::delete('/post/{postId}', [PostController::class, "deletePost"])->middlewa
 
 
 Route::get('/profile/{userId:username}', [UserController::class, "profile"]);
+Route::get('/profile/{userId:username}/followers', [UserController::class, "profileFollowers"]);
+Route::get('/profile/{userId:username}/following', [UserController::class, "profileFollowing"]);
