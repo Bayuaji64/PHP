@@ -1,7 +1,8 @@
 <?php
 
-use App\Http\Controllers\PostController;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
 
 /*
@@ -15,15 +16,39 @@ use App\Http\Controllers\UserController;
 |
 */
 
+Route::get('/admin-only', function () {
+
+    // if (Gate::allows('visitAdminPages')) {
+
+    //     return 'Only ADMIN';
+
+    //     # code...
+    // }
+
+    return 'you cannot view this page';
+})->middleware('can:visitAdminPages');
+
 //User related routes
-Route::get('/', [UserController::class, "showCorrectHomePage"]);
-Route::post('/register', [UserController::class, "register"]);
-Route::post('/login', [UserController::class, "login"]);
-Route::post('/logout', [UserController::class, "logout"]);
+Route::get('/', [UserController::class, "showCorrectHomePage"])->name('login');
+Route::post('/register', [UserController::class, "register"])->middleware('guest');
+Route::post('/login', [UserController::class, "login"])->middleware('guest');
+Route::post('/logout', [UserController::class, "logout"])->middleware('mustBeLoggedIn');
 
 
 
 //Blog post related routes
-Route::get('/create-post', [PostController::class, "showCreateForm"]);
-Route::post('/create-post', [PostController::class, "storeNewPost"]);
+Route::get('/create-post', [PostController::class, "showCreateForm"])->middleware('mustBeLoggedIn');
+Route::post('/create-post', [PostController::class, "storeNewPost"])->middleware('mustBeLoggedIn');
 Route::get('/post/{postId}', [PostController::class, "viewSinglePost"]);
+
+Route::get('/post/{postId}/edit', [PostController::class, "showEditPost"])->middleware('can:update,postId');
+Route::put('/post/{postId}', [PostController::class, "EditPost"])->middleware('can:update,postId');
+
+Route::delete('/post/{postId}', [PostController::class, "deletePost"])->middleware('can:delete,postId');
+
+
+
+//profile related routes 
+
+
+Route::get('/profile/{userId:username}', [UserController::class, "profile"]);

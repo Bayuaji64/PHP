@@ -14,6 +14,7 @@ class PostController extends Controller
     public function showCreateForm()
     {
 
+
         return view('create-post');
     }
 
@@ -41,11 +42,58 @@ class PostController extends Controller
     public function viewSinglePost(Post $postId)
     {
 
+        // if ($postId->user_id === auth()->user()->id) {
+
+        //     return 'you are the author';
+        // }
+
+
+        // return 'you are not the author';
+
 
         $postId['body'] = strip_tags(Str::markdown($postId->body), '<p><ul><li><strong><em><h3><br>');
 
         // return $userId->title;
         return view('single-post', ['postData' => $postId]);
-        # code...
+    }
+
+
+    public function deletePost(Post $postId)
+    {
+
+
+        // if (auth()->user()->cannot('delete', $postId)) {
+        //     return 'You cannot do that';
+        // }
+
+
+        $postId->delete();
+
+
+        return redirect('/profile/' . auth()->user()->username)->with('success', 'Post successfully deleted.');
+    }
+
+
+    public function showEditPost(Post $postId)
+    {
+
+        return view('edit-post', ['postData' => $postId]);
+    }
+
+    public function EditPost(Post $postId, Request $request)
+    {
+        $incomingFields = $request->validate([
+
+            'title' => 'required',
+            'body' => 'required'
+
+        ]);
+
+        $incomingFields['title'] = strip_tags($incomingFields['title']);
+        $incomingFields['body'] = strip_tags($incomingFields['body']);
+
+        $postId->update($incomingFields);
+
+        return back()->with('success', 'Post successfully updated.');
     }
 }
