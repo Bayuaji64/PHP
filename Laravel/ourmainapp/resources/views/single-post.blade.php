@@ -21,8 +21,8 @@
       </div>
 
       <p class="text-muted small mb-4">
-        <a href="#"><img class="avatar-tiny" src="{{$postData->userData->avatar}}" /></a>
-        Posted by <a href="#">{{$postData -> userData-> username}}</a> on {{$postData -> created_at-> format('n/j/Y')}}
+        <a href="/profile/{{$postData->userData->username}}"><img class="avatar-tiny" src="{{$postData->userData->avatar}}" /></a>
+        Posted by <a href="/profile/{{$postData->userData->username}}">{{$postData -> userData-> username}}</a> on {{$postData -> created_at-> format('n/j/Y')}}
       </p>
 
       <div class="body-content">

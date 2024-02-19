@@ -63,7 +63,7 @@ class UserController extends Controller
 
         if (auth()->check()) {
 
-            return view('homepage-feed');
+            return view('homepage-feed', ['posts' => auth()->user()->feedPosts()->latest()->get()]);
             # code...
         } else {
             return view('homepage');
@@ -89,7 +89,7 @@ class UserController extends Controller
             # code...
         }
 
-        View::share('sharedData', ['currentlyFollowing' => $currentlyFollowing, 'avatar' => $userId->avatar, 'username' => $userId->username, 'postCount' => $userId->posts()->count()]);
+        View::share('sharedData', ['currentlyFollowing' => $currentlyFollowing, 'avatar' => $userId->avatar, 'username' => $userId->username, 'postCount' => $userId->posts()->count(), 'followerCount' => $userId->followers()->count(), 'followingCount' => $userId->followingTheseUsers()->count()]);
     }
 
 
@@ -117,6 +117,7 @@ class UserController extends Controller
     {
 
         $this->getSharedData($userId);
+        // return  $userId->followers()->latest()->get();
         // $thePosts = $userId->posts()->get();
         // return $thePosts;
         // $currentlyFollowing = 0;
@@ -128,7 +129,7 @@ class UserController extends Controller
         //     # code...
         // }
 
-        return view('profile-followers', ['posts' => $userId->posts()->latest()->get()]);
+        return view('profile-followers', ['followers' => $userId->followers()->latest()->get()]);
     }
 
 
@@ -147,7 +148,7 @@ class UserController extends Controller
         //     # code...
         // }
 
-        return view('profile-following', ['posts' => $userId->posts()->latest()->get()]);
+        return view('profile-following', ['following' => $userId->followingTheseUsers()->latest()->get()]);
     }
     public function showAvatar()
     {
