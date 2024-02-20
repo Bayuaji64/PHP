@@ -96,4 +96,20 @@ class PostController extends Controller
 
         return back()->with('success', 'Post successfully updated.');
     }
+
+
+    public function search($term)
+    {
+
+        $posts = Post::search($term)->get();
+
+        $posts->load('userData:id,username,avatar');
+
+        return $posts;
+
+        // composer require laravel/scout
+        // php artisan vendor:publish --provider="Laravel\Scout\ScoutServiceProvider"
+
+
+    }
 }

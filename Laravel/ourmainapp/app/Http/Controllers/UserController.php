@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\OurExampleEvent;
 use App\Models\User;
 use App\Models\Follow;
 use Illuminate\Http\Request;
@@ -28,6 +29,10 @@ class UserController extends Controller
         if (auth()->attempt(['username' => $incomingFields['loginusername'], 'password' => $incomingFields['loginpassword']])) {
 
             $request->session()->regenerate();
+
+            // event(new OurExampleEvent());
+
+            event(new OurExampleEvent(['username' => auth()->user()->username, 'action' => 'login']));
 
             return redirect('/')->with('success', 'You have successfully logged in');
         } else {
@@ -63,7 +68,7 @@ class UserController extends Controller
 
         if (auth()->check()) {
 
-            return view('homepage-feed', ['posts' => auth()->user()->feedPosts()->latest()->get()]);
+            return view('homepage-feed', ['posts' => auth()->user()->feedPosts()->latest()->paginate(5)]);
             # code...
         } else {
             return view('homepage');
@@ -73,6 +78,7 @@ class UserController extends Controller
 
     public function logout()
     {
+        event(new OurExampleEvent(['username' => auth()->user()->username, 'action' => 'logout']));
         auth()->logout();
         return redirect('/')->with('success', 'You are now logged out');
     }
@@ -109,7 +115,7 @@ class UserController extends Controller
         //     # code...
         // }
 
-        return view('profile-posts', ['posts' => $userId->posts()->latest()->get()]);
+        return view('profile-posts', ['posts' => $userId->posts()->latest()->paginate(5)]);
     }
 
 
@@ -150,6 +156,30 @@ class UserController extends Controller
 
         return view('profile-following', ['following' => $userId->followingTheseUsers()->latest()->get()]);
     }
+
+
+
+
+    public function profileRaw(User $userId)
+    {
+        return response()->json(['theHTML' => view("profile-posts-only", ['posts' => $userId->posts()->latest()->get()])->render(), 'docTitle' => $userId->username . "'s Profile"]);
+    }
+
+
+    public function profileFollowersRaw(User $userId)
+    {
+
+        return response()->json(['theHTML' => view("profile-followers-only", ['followers' => $userId->followers()->latest()->get()])->render(), 'docTitle' => $userId->username . "'s Followers"]);
+    }
+
+    public function profileFollowingRaw(User $userId)
+    {
+        return response()->json(['theHTML' => view("profile-following-only", ['following' => $userId->followingTheseUsers()->latest()->get()])->render(), 'docTitle' => 'Whos ' . $userId->username . "Follows"]);
+    }
+
+
+
+
     public function showAvatar()
     {
         return view('avatar-form');

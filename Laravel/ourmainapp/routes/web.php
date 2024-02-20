@@ -1,10 +1,12 @@
 <?php
 
+use App\Events\ChatMessage;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\FollowController;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,6 +55,8 @@ Route::get('/post/{postId}/edit', [PostController::class, "showEditPost"])->midd
 Route::put('/post/{postId}', [PostController::class, "EditPost"])->middleware('can:update,postId');
 
 Route::delete('/post/{postId}', [PostController::class, "deletePost"])->middleware('can:delete,postId');
+Route::get('/search/{term}', [PostController::class, 'search']);
+
 
 
 
@@ -62,3 +66,30 @@ Route::delete('/post/{postId}', [PostController::class, "deletePost"])->middlewa
 Route::get('/profile/{userId:username}', [UserController::class, "profile"]);
 Route::get('/profile/{userId:username}/followers', [UserController::class, "profileFollowers"]);
 Route::get('/profile/{userId:username}/following', [UserController::class, "profileFollowing"]);
+
+
+Route::middleware('cache.headers:public;max_age=20;etag')->group(function () {
+
+    Route::get('/profile/{userId:username}/raw', [UserController::class, "profileRaw"]);
+    Route::get('/profile/{userId:username}/followers/raw', [UserController::class, "profileFollowersRaw"]);
+    Route::get('/profile/{userId:username}/following/raw', [UserController::class, "profileFollowingRaw"]);
+});
+
+//chat routes
+
+Route::post('/send-chat-message', function (Request $request) {
+    // composer require pusher/pusher-php-server
+
+    $formFields = $request->validate([
+        'textvalue' => 'required'
+    ]);
+
+    if (!trim(strip_tags($formFields['textvalue']))) {
+        return response()->noContent();
+        # code...
+    }
+
+    broadcast(new ChatMessage(['username' => auth()->user()->username, 'textvalue' => strip_tags($request->textvalue), 'avatar' => auth()->user()->avatar]))->toOthers();
+
+    return response()->noContent();
+})->middleware('mustBeLoggedIn');

@@ -7,13 +7,16 @@
 
 <div class="list-group">
         @foreach($posts as $post)
-        <a href="/post/{{$post->id}}" class="list-group-item list-group-item-action">
-          <img class="avatar-tiny" src="{{$post->userData->avatar}}" />
-          <strong>{{$post->title}}</strong> <span class="text-muted small"> by {{$post->userData->username}} on {{$post->created_at->format('n/j/Y')}}</span>
-        </a>
+       <x-post :post="$post" />
         @endforeach
       </div>
+
+      <div class="mt-4">
+   {{$posts->links()}}
+      </div>
+     
   @else
+
 
    <div class="text-center">
         <h2>Hello <strong>{{auth()-> user()->username}}</strong>, your feed is empty.</h2>

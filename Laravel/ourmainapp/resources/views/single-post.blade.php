@@ -1,6 +1,6 @@
 {{-- @include('header') --}}
 
-<x-layout>
+<x-layout :doctitle="$postData->title">
  <div class="container py-md-5 container--narrow">
       <div class="d-flex justify-content-between">
         <h2>{{$postData->title}}</h2>
