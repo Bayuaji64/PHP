@@ -2,18 +2,44 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\OurExampleEvent;
+use App\Models\Post;
 use App\Models\User;
 use App\Models\Follow;
 use Illuminate\Http\Request;
+use App\Events\OurExampleEvent;
 use Illuminate\Validation\Rule;
 
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Cache;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\View;
 
 class UserController extends Controller
 {
+
+	public function loginApi(Request $request){
+	 
+		$incomingFields = $request->validate([
+
+            'username' => 'required',
+            'password' => 'required'
+
+
+        ]);
+
+		if (auth()->attempt($incomingFields)) {
+			# code...
+			$user = User::where('username', $incomingFields['username'])->first();
+			$token = $user -> createToken('ourapptoken')->plainTextToken;
+			return $token;
+		}
+
+		return '';
+
+
+
+
+	}
 
     public function login(Request $request)
     {
@@ -71,7 +97,25 @@ class UserController extends Controller
             return view('homepage-feed', ['posts' => auth()->user()->feedPosts()->latest()->paginate(5)]);
             # code...
         } else {
-            return view('homepage');
+
+			// if (Cache::has('postCount')) {
+			// 	$postCount = Cache::get('postCount');
+			// } else {
+			// 	sleep(5);
+
+			// 	$postCount = Post::count();
+			// 	Cache::put('postCount',$postCount,20);
+
+			// }
+
+			$postCount = Cache::remember('postCount',20, function(){
+
+				// sleep(5);
+				return Post::count();
+
+
+			});
+            return view('homepage',['postCount'=>$postCount]);
         }
     }
 
